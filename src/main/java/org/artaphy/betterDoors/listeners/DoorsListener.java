@@ -11,26 +11,48 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * 监听玩家与门交互的事件处理类
+ */
 public class DoorsListener implements Listener {
 
+    /**
+     * 是否启用双开门配置
+     */
     private final boolean doubleDoors;
 
+    /**
+     * 构造函数，用于初始化DoorsListener
+     * 
+     * @param plugin 插件实例，用于获取配置
+     */
     public DoorsListener(JavaPlugin plugin) {
         FileConfiguration config = plugin.getConfig();
         this.doubleDoors = config.getBoolean("double-doors", true);
     }
 
+    /**
+     * 处理玩家与方块交互事件
+     * 
+     * @param event 交互事件
+     */
     @EventHandler
     public void onPlayerInteractBlock(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
 
         if (block == null) return;
 
+        // 检查是否为右击门方块，并且双开门功能已启用
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK && block.getBlockData() instanceof Door && this.doubleDoors) {
             handleDoorInteraction(block);
         }
     }
 
+    /**
+     * 处理门的交互逻辑
+     * 
+     * @param block 被交互的门方块
+     */
     private void handleDoorInteraction(Block block) {
         Door door = (Door) block.getBlockData();
         BlockFace face = door.getFacing();
@@ -39,13 +61,16 @@ public class DoorsListener implements Listener {
 
         BlockFace[] adjacentFaces = getAdjacentFaces(face);
 
+        // 遍历相邻方块，寻找双开门的另一半
         for (BlockFace adjacentFace : adjacentFaces) {
             Block neighbourBlock = block.getRelative(adjacentFace);
             if (neighbourBlock.getBlockData() instanceof Door neighbourDoor) {
+                // 检查相邻门是否为双开门的另一半，并设置其开闭状态
                 if (neighbourDoor.getHinge() != hinge && neighbourDoor.getFacing() == face) {
                     neighbourDoor.setOpen(opened);
                     neighbourBlock.setBlockData(neighbourDoor);
 
+                    // 处理双开门的上下两部分
                     Block otherHalf = neighbourDoor.getHalf() == Bisected.Half.BOTTOM ?
                             neighbourBlock.getRelative(BlockFace.UP) : neighbourBlock.getRelative(BlockFace.DOWN);
                     if (otherHalf.getBlockData() instanceof Door otherDoor) {
@@ -56,6 +81,7 @@ public class DoorsListener implements Listener {
             }
         }
 
+        // 处理当前门方块的上下两部分
         Block otherHalf = door.getHalf() == Bisected.Half.BOTTOM ?
                 block.getRelative(BlockFace.UP) : block.getRelative(BlockFace.DOWN);
         if (otherHalf.getBlockData() instanceof Door otherDoor) {
@@ -64,6 +90,12 @@ public class DoorsListener implements Listener {
         }
     }
 
+    /**
+     * 根据门的朝向获取相邻方块的方向
+     * 
+     * @param face 门的朝向
+     * @return 相邻方块的两个方向
+     */
     private BlockFace[] getAdjacentFaces(BlockFace face) {
         return switch (face) {
             case EAST -> new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH};
