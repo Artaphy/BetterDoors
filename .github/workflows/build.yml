@@ -12,8 +12,8 @@ jobs:
       - uses: gradle/gradle-build-action@v2
       - uses: actions/setup-java@v3
         with:
-          distribution: "temurin"
-          java-version: "17"
+          distribution: "zulu"
+          java-version: "21"
       - name: Apply Patches and Build
         run: |
           git config --global user.email "actions@github.com"
