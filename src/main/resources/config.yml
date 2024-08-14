@@ -1,0 +1,31 @@
+#----------------------#
+#     Double Doors     #
+#----------------------#
+
+# Enable or disable the double door functionality.
+# When enabled, adjacent doors will automatically synchronize their open/close state.
+double-doors: true
+
+#----------------------#
+#      Iron Doors      #
+#----------------------#
+
+# Allow players to open/close iron doors by right-clicking with an empty hand.
+# Set to 'true' to enable this feature, or 'false' to disable it.
+opening-irondoors-with-hands: false
+
+#----------------------#
+#       Knocking       #
+#----------------------#
+
+# Enable or disable the knocking feature.
+# When enabled, players can knock on doors to play specific sounds.
+knocking: true
+
+# Require the player to be holding nothing (empty hand) to knock on doors.
+# Set to 'true' to require an empty hand, or 'false' to allow knocking with any item in hand.
+knocking-require-empty-hand: true
+
+# Require the player to be sneaking to knock on doors.
+# Set to 'true' to require sneaking, or 'false' to allow knocking without sneaking.
+knocking-require-sneaking: false
