@@ -15,16 +15,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class DoorListener implements Listener {
-
     private final boolean openingIronDoorsWithHands;
     private final boolean knocking;
     private final boolean knockingRequireEmptyHand;
     private final boolean knockingRequireSneaking;
-
-    private static final float KNOCK_VOLUME = 0.8f;
-    private static final float KNOCK_PITCH = 1.0f;
-    private static final float DOOR_SOUND_VOLUME = 1.0f;
-    private static final float DOOR_SOUND_PITCH = 1.0f;
 
     public DoorListener(JavaPlugin plugin) {
         FileConfiguration config = plugin.getConfig();
@@ -39,44 +33,31 @@ public class DoorListener implements Listener {
         Block block = event.getClickedBlock();
         if (block == null) return;
 
-        if (isKnocking(event, block)) {
-            handleKnocking(event, block);
-            return;
+        boolean isDoor = block.getState().getBlockData() instanceof Door;
+
+        if (knocking && event.getAction() == Action.LEFT_CLICK_BLOCK && isDoor) {
+            if (!knockingRequireEmptyHand || event.getPlayer().getInventory().getItemInMainHand().getType() == Material.AIR) {
+                if (!knockingRequireSneaking || event.getPlayer().isSneaking()) {
+                    Sound knockSound = block.getType() == Material.IRON_DOOR
+                            ? Sound.BLOCK_IRON_DOOR_OPEN
+                            : Sound.ITEM_SHIELD_BLOCK;
+                    event.getPlayer().playSound(block.getLocation(), knockSound, 0.8f, 1.0f);
+                    event.setCancelled(true);
+                }
+            }
         }
 
-        if (isOpeningIronDoor(event, block)) {
-            handleIronDoorOpening(event, block);
-        }
-    }
+        if (block.getType() != Material.IRON_DOOR) return;
+        if (!openingIronDoorsWithHands) return;
 
-    private boolean isKnocking(PlayerInteractEvent event, Block block) {
-        return knocking && event.getAction() == Action.LEFT_CLICK_BLOCK
-                && block.getState().getBlockData() instanceof Door
-                && (!knockingRequireEmptyHand || event.getPlayer().getInventory().getItemInMainHand().getType() == Material.AIR)
-                && (!knockingRequireSneaking || event.getPlayer().isSneaking());
-    }
-
-    private void handleKnocking(PlayerInteractEvent event, Block block) {
-        Sound knockSound = block.getType() == Material.IRON_DOOR
-                ? Sound.BLOCK_IRON_DOOR_OPEN
-                : Sound.ITEM_SHIELD_BLOCK;
-        event.getPlayer().playSound(block.getLocation(), knockSound, KNOCK_VOLUME, KNOCK_PITCH);
-        event.setCancelled(true);
-    }
-
-    private boolean isOpeningIronDoor(PlayerInteractEvent event, Block block) {
-        return block.getType() == Material.IRON_DOOR
-                && openingIronDoorsWithHands
-                && event.getAction() == Action.RIGHT_CLICK_BLOCK
-                && event.getHand() == EquipmentSlot.HAND
-                && event.getPlayer().getInventory().getItemInMainHand().getType() == Material.AIR;
-    }
-
-    private void handleIronDoorOpening(PlayerInteractEvent event, Block block) {
         Door door = (Door) block.getBlockData();
         Player player = event.getPlayer();
-        toggleDoor(block, door, player);
-        event.setCancelled(true);
+
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getHand() == EquipmentSlot.HAND
+                && player.getInventory().getItemInMainHand().getType() == Material.AIR) {
+            toggleDoor(block, door, player);
+            event.setCancelled(true);
+        }
     }
 
     private void toggleDoor(Block block, Door door, Player player) {
@@ -91,6 +72,6 @@ public class DoorListener implements Listener {
         }
 
         Sound sound = wasOpen ? Sound.BLOCK_IRON_DOOR_CLOSE : Sound.BLOCK_IRON_DOOR_OPEN;
-        player.playSound(player.getLocation(), sound, DOOR_SOUND_VOLUME, DOOR_SOUND_PITCH);
+        player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
     }
 }
