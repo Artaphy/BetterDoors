@@ -1,5 +1,5 @@
 name: BetterDoors
-version: '1.0.0-SNAPSHOT'
+version: '1.0.0-HOTFIX'
 main: org.artaphy.betterDoors.BetterDoors
 api-version: '1.21'
 load: STARTUP

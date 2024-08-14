@@ -33,7 +33,9 @@ public class DoorListener implements Listener {
         Block block = event.getClickedBlock();
         if (block == null) return;
 
-        if (knocking && event.getAction() == Action.LEFT_CLICK_BLOCK) {
+        boolean isDoor = block.getState().getBlockData() instanceof Door;
+
+        if (knocking && event.getAction() == Action.LEFT_CLICK_BLOCK && isDoor) {
             if (!knockingRequireEmptyHand || event.getPlayer().getInventory().getItemInMainHand().getType() == Material.AIR) {
                 if (!knockingRequireSneaking || event.getPlayer().isSneaking()) {
                     Sound knockSound = block.getType() == Material.IRON_DOOR
