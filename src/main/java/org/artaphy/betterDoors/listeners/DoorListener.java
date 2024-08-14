@@ -15,6 +15,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class DoorListener implements Listener {
+    
     private final boolean openingIronDoorsWithHands;
     private final boolean knocking;
     private final boolean knockingRequireEmptyHand;
